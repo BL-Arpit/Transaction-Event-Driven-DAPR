@@ -1,9 +1,11 @@
 package com.bl.poc.aggregator.api;
 
+import com.bl.poc.aggregator.model.BatchStatusResponse;
 import com.bl.poc.aggregator.model.BufferStatusResponse;
 import com.bl.poc.aggregator.model.ErrorResponse;
 import com.bl.poc.aggregator.model.PaymentEvent;
 import com.bl.poc.aggregator.model.PaymentEventResponse;
+import com.bl.poc.aggregator.service.BatchFormationService;
 import com.bl.poc.aggregator.service.InMemoryEventBufferService;
 import com.bl.poc.aggregator.service.PaymentValidationService;
 import org.slf4j.Logger;
@@ -22,13 +24,16 @@ public class PaymentEventController {
 
     private final PaymentValidationService validationService;
     private final InMemoryEventBufferService bufferService;
+    private final BatchFormationService batchFormationService;
 
     public PaymentEventController(
             PaymentValidationService validationService,
-            InMemoryEventBufferService bufferService
+            InMemoryEventBufferService bufferService,
+            BatchFormationService batchFormationService
     ) {
         this.validationService = validationService;
         this.bufferService = bufferService;
+        this.batchFormationService = batchFormationService;
     }
 
     @PostMapping("/payment")
@@ -40,7 +45,7 @@ public class PaymentEventController {
             int bufferSize = bufferService.addEvent(paymentEvent);
 
             log.info(
-                    "UC2_PAYMENT_EVENT_BUFFERED transactionId={} orderId={} merchantId={} amount={} currency={} paymentMode={} paymentStatus={} eventTimestamp={} bufferSize={}",
+                    "UC3_PAYMENT_EVENT_BUFFERED transactionId={} orderId={} merchantId={} amount={} currency={} paymentMode={} paymentStatus={} eventTimestamp={} bufferSize={}",
                     paymentEvent.getTransactionId(),
                     paymentEvent.getOrderId(),
                     paymentEvent.getMerchantId(),
@@ -52,17 +57,19 @@ public class PaymentEventController {
                     bufferSize
             );
 
+            batchFormationService.evaluateBatchCreationBySize();
+
             return ResponseEntity.ok(
                     PaymentEventResponse.accepted(
                             paymentEvent.getTransactionId(),
-                            bufferSize
+                            bufferService.getBufferSize()
                     )
             );
 
         } catch (IllegalArgumentException validationException) {
 
             log.warn(
-                    "UC2_PAYMENT_EVENT_REJECTED reason={} payloadTransactionId={}",
+                    "UC3_PAYMENT_EVENT_REJECTED reason={} payloadTransactionId={}",
                     validationException.getMessage(),
                     paymentEvent != null ? paymentEvent.getTransactionId() : null
             );
@@ -78,7 +85,7 @@ public class PaymentEventController {
 
         int bufferSize = bufferService.getBufferSize();
 
-        log.info("UC2_BUFFER_STATUS_REQUESTED bufferSize={}", bufferSize);
+        log.info("UC3_BUFFER_STATUS_REQUESTED bufferSize={}", bufferSize);
 
         return ResponseEntity.ok(
                 BufferStatusResponse.currentStatus(bufferSize)
@@ -90,10 +97,35 @@ public class PaymentEventController {
 
         bufferService.clearBuffer();
 
-        log.info("UC2_BUFFER_CLEARED");
+        log.info("UC3_BUFFER_CLEARED");
 
         return ResponseEntity.ok(
                 BufferStatusResponse.cleared()
+        );
+    }
+
+    @GetMapping("/batches")
+    public ResponseEntity<BatchStatusResponse> getBatches() {
+
+        return ResponseEntity.ok(
+                BatchStatusResponse.currentStatus(
+                        batchFormationService.getCreatedBatches()
+                )
+        );
+    }
+
+    @DeleteMapping("/batches")
+    public ResponseEntity<Map<String, Object>> clearBatches() {
+
+        batchFormationService.clearCreatedBatches();
+
+        log.info("UC3_BATCH_HISTORY_CLEARED");
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "status", "SUCCESS",
+                        "message", "Created batch history cleared successfully"
+                )
         );
     }
 
@@ -103,8 +135,9 @@ public class PaymentEventController {
                 Map.of(
                         "status", "UP",
                         "service", "transaction-aggregator-service",
-                        "useCase", "UC2 - Temporary Event Buffering",
-                        "bufferSize", bufferService.getBufferSize()
+                        "useCase", "UC3 - Basic Batch Formation",
+                        "bufferSize", bufferService.getBufferSize(),
+                        "createdBatchCount", batchFormationService.getCreatedBatches().size()
                 )
         );
     }
