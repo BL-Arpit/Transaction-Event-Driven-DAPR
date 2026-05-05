@@ -135,7 +135,7 @@ public class PaymentEventController {
                 Map.of(
                         "status", "UP",
                         "service", "transaction-aggregator-service",
-                        "useCase", "UC3 - Basic Batch Formation",
+                        "useCase", "UC4 - Kafka-Based Event Ingestion",
                         "bufferSize", bufferService.getBufferSize(),
                         "createdBatchCount", batchFormationService.getCreatedBatches().size()
                 )
