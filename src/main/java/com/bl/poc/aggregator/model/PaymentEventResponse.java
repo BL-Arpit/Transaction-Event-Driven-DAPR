@@ -1,0 +1,46 @@
+package com.bl.poc.aggregator.model;
+
+import java.time.Instant;
+
+public class PaymentEventResponse {
+
+    private String status;
+    private String transactionId;
+    private String message;
+    private Instant processedAt;
+
+    public PaymentEventResponse() {
+    }
+
+    public PaymentEventResponse(String status, String transactionId, String message, Instant processedAt) {
+        this.status = status;
+        this.transactionId = transactionId;
+        this.message = message;
+        this.processedAt = processedAt;
+    }
+
+    public static PaymentEventResponse accepted(String transactionId) {
+        return new PaymentEventResponse(
+                "ACCEPTED",
+                transactionId,
+                "Payment event accepted successfully",
+                Instant.now()
+        );
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Instant getProcessedAt() {
+        return processedAt;
+    }
+}
