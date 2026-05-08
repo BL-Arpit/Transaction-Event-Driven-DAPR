@@ -4,13 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-
-@EnableScheduling
 @SpringBootApplication
-public class TransactionAggregatorServiceApplication {
+@EnableScheduling
+public class PaymentBatchStateServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TransactionAggregatorServiceApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentBatchStateServiceApplication.class, args);
+    }
 }
