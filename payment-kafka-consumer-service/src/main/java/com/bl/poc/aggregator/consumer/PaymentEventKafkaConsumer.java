@@ -35,7 +35,7 @@ public class PaymentEventKafkaConsumer {
 
     @KafkaListener(
             topics = "payment-events",
-            groupId = "payment-processing-uc5-group"
+            groupId = "payment-processing-uc6-group"
     )
     public void consume(ConsumerRecord<String, String> record) {
 
@@ -59,7 +59,7 @@ public class PaymentEventKafkaConsumer {
             );
 
             log.info(
-                    "UC5_PAYMENT_VALIDATED transactionId={} validationService={}",
+                    "UC6_PAYMENT_VALIDATED transactionId={} validationService={}",
                     paymentEvent.getTransactionId(),
                     validationUrl
             );
@@ -71,7 +71,7 @@ public class PaymentEventKafkaConsumer {
             );
 
             log.info(
-                    "UC5_PAYMENT_SENT_TO_BATCH_STATE transactionId={} batchStateService={} limitation=no_durable_batch_membership",
+                    "UC6_PAYMENT_SENT_TO_BATCH_STATE transactionId={} batchStateService={} limitation=no_durable_batch_membership",
                     paymentEvent.getTransactionId(),
                     batchStateUrl
             );
@@ -79,7 +79,7 @@ public class PaymentEventKafkaConsumer {
         } catch (Exception exception) {
 
             log.error(
-                    "UC5_KAFKA_EVENT_PROCESSING_FAILED topic={} partition={} offset={} key={} reason={}",
+                    "UC6_KAFKA_EVENT_PROCESSING_FAILED topic={} partition={} offset={} key={} reason={}",
                     record.topic(),
                     record.partition(),
                     record.offset(),
