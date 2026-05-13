@@ -30,3 +30,9 @@ services:
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: uc8-redis
+    ports:
+      - "6380:6379"

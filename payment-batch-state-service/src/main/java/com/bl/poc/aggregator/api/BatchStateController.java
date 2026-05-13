@@ -64,8 +64,9 @@ public class BatchStateController {
                 Map.of(
                         "service", "payment-batch-state-service",
                         "status", "UP",
-                        "useCase", "UC5 - In-Memory Batch State Microservice",
-                        "importantLimitation", "Restarting this service will erase buffer and batch history"
+                        "useCase", "UC8 - Durable Buffering Using Dapr State Store",
+                        "stateStore", "Dapr statestore",
+                        "importantLimitation", "Durable buffer added, but idempotency and exactly-once are not implemented yet"
                 )
         );
     }
